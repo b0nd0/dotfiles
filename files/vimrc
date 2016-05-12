@@ -1,0 +1,176 @@
+""######################     .vimrc     ###########################
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'Valloric/YouCompleteMe'
+
+" youcompleteme scratch close
+autocmd CompleteDone * pclose
+
+" Track the engine.
+Plugin 'SirVer/ultisnips'
+" " Snippets are separated from the engine. Add this if you want them:
+Plugin 'honza/vim-snippets'
+"let g:UltiSnipsExpandTrigger="<S-n>"
+Plugin 'taq/vim-refact'
+
+" Tags tree for current file
+"Plugin 'majutsushi/tagbar'
+"Plugin 'vim-php/tagbar-phpctags.vim'
+"let g:tagbar_phpctags_bin='~/.vim/bundle/tagbar-phpctags.vim/bin/phpctags'
+
+Plugin 'zefei/cake16'
+Plugin 'kien/ctrlp.vim'
+
+"tags
+Plugin 'xolox/vim-misc'
+Plugin 'xolox/vim-easytags'
+let g:easytags_auto_highlight = 0
+let g:easytags_python_enabled=1
+
+Plugin 'bling/vim-bufferline'
+
+Plugin 'fatih/vim-go'
+
+" laravel .blade.php syntax plugin
+Plugin 'jwalton512/vim-blade'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+
+syntax on
+
+" youcompleteme fix: https://github.com/Valloric/YouCompleteMe/issues/2064
+let g:ycm_path_to_python_interpreter = '/usr/bin/python'
+
+" vim-airline status bar
+
+"let g:airline_theme='simple'
+let g:airline_theme='badwolf'
+
+set t_Co=256
+
+" UltiSnips keybindings
+let g:UltiSnipsExpandTrigger="<c-j>"
+let g:UltiSnipsJumpForwardTrigger="<c-j>"
+
+set ai
+set nocompatible
+set relativenumber
+set nohlsearch
+set incsearch           " do incremental searching
+set backspace=indent,eol,start
+set bg=light
+"colorscheme asmdev
+"no beep
+set vb t_vb=
+set wildmode=list:longest
+
+set foldmethod=marker
+
+"set tags+=./.git/tags
+
+"set backup
+"set backupdir=~/tmp,.,~/
+":au BufWritePre * let &bex = '_' . strftime("%F_%H-%M")
+
+" Преобразование Таба в пробелы
+set expandtab
+" Размер табуляции по умолчанию
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+
+set showtabline=2
+set tabpagemax=100
+
+" Теперь нет необходимости передвигать курсор к краю экрана, чтобы подняться/опуститься
+" в режиме редактирования
+set scrolloff=8
+
+" хранить историю undo после закрытия файла
+set undofile
+set undodir=$HOME/.vim/undo_data
+set undolevels=1000
+
+inoremap jj <Esc>
+cnoremap %% <C-R>=expand('%:h').'/'<cr>
+
+map <M-.> :next<CR>
+map <M-,> :prev<CR>
+""Подсветка найденого по F1
+nmap <F1> :set invhlsearch hlsearch?<CR>
+imap <F1> <ESC>:set invhlsearch hlsearch?<CR>a
+""Отключение сдвигов при copy-paste.
+nmap <F3> :set invpaste paste?<CR>
+imap <F3> <ESC>:set invpaste paste?<CR>a
+""wrap по F4
+nmap <F4> :set invwrap wrap?<CR>
+imap <F4> <ESC>:set invwrap wrap?<CR>a
+""prev tab по F5
+nmap <F5> :bp<CR>
+imap <F5> <ESC>:bp<CR>
+""next tab по F6
+nmap <F6> :bn<CR>
+imap <F6> <ESC>:bn<CR>
+
+""map <F6> <ESC>:tabn<CR>
+map <F7> :set invlist list?<CR>
+map <F8> :execute RotateEnc()<CR>
+map <F9> :set invnumber number?<CR>
+map <F10> [I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
+
+" <F8> File encoding for open
+" " ucs-2le - MS Windows unicode encoding
+vmap <F8>    <C-C><F8>
+imap <F8>    <C-O><F8>
+let b:encindex=0
+function! RotateEnc()
+    let y = -1
+    while y == -1
+"        let encstring = "#koi8-u#cp1251#8bit-cp866#utf-8#ucs-2le#"
+        let encstring = "#utf-8#cp1251#8bit-cp866#koi8-u#"
+        let x = match(encstring,"#",b:encindex)
+        let y = match(encstring,"#",x+1)
+        let b:encindex = x+1
+        if y == -1
+            let b:encindex = 0
+        else
+            let str = strpart(encstring,x+1,y-x-1)
+            return ":e ++enc=".str
+        endif
+    endwhile
+endfunction
+
+set fileencodings=utf-8,cp1251,cp866,koi8-u
+set encoding=utf-8
+set termencoding=utf-8
+
+set statusline=%<%f%h%m%r%=format=%{&fileformat}\ file=%{&fileencoding}\ enc=%{&encoding}\ %b\ 0x%B\ %l,%c%V\ %P
+set laststatus=2
+
+" snipMate php code in .html file
+au BufRead,BufNewFile *.html set filetype=html.php
+au BufRead,BufNewFile *.php set filetype=php.html
+au BufRead,BufNewFile *.blade.php set filetype=blade
+
+autocmd FileType python setlocal colorcolumn=80
+highlight ColorColumn ctermbg=7
+
+vmap gl :<C-U>!git blame <C-R>=expand("%:p") <CR> \| sed -n <C-R>=line("'<") <CR>,<C-R>=line("'>") <CR>p <CR>
+
+" jump to the last position when reopening a file
+if has("autocmd")
+  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif

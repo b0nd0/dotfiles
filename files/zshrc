@@ -1,0 +1,104 @@
+######################    .zshrc     ###########################
+autoload -U colors && colors
+autoload -U promptinit && promptinit
+autoload -U compinit && compinit
+
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
+zstyle ':completion:*' group-name ''
+
+export LC_CTYPE=en_US.UTF-8
+export EDITOR=vim
+export VISUAL=vim
+export PAGER=less
+export GREP_COLOR="1;32"
+export PATH="$PATH:$HOME/bin"
+
+setopt HIST_IGNORE_DUPS
+setopt HIST_SAVE_NO_DUPS
+
+alias vi='vim'
+alias mc='mc -b'
+alias ls='ls -F --color=auto'
+alias ll='ls -l'
+alias edconf='vi ~/.zshrc'
+alias resume='screen -d -RR -U'
+alias notes="vim -p ~/.notes"
+alias todo="vim -p ~/.todo"
+alias -g DC="| colordiff | less -R"
+alias grep="grep --color=auto"
+alias cgrep="grep --color=always"
+alias mysql="mysql --pager"
+
+alias chmod_files='find -maxdepth 10 -type f -exec chmod 644 {} \;'
+alias chmod_folders='find -maxdepth 10 -type d -exec chmod 755 {} \;'
+
+HISTFILE=~/.zsh_history
+HISTSIZE=100
+SAVEHIST=100
+
+colors=(yellow red blue green magenta)
+rcolor=$colors[$(($RANDOM % ${#colors[*]} + 1))]
+
+FCOLOR='black'
+if [[ -o login ]]; then
+    FCOLOR='white'
+fi
+USYMBOL='$'
+if [ `id -u` = 0 ]; then
+    USYMBOL='#'
+fi
+PS1="%{$fg[$rcolor]%}%n@%m:%~$USYMBOL %{$fg_no_bold[$FCOLOR]%}"
+
+function parse_git_branch() {
+    git branch 2> /dev/null | grep "*" | sed -e 's/* \(.*\)/\1/g'
+}
+
+function form_right_prompt() {
+    local git_branch="$(parse_git_branch)"
+    if [ -z $git_branch ]; then
+        echo ''
+    else
+        echo "<< %{$fg[$rcolor]%}$git_branch%{$fg_no_bold[$FCOLOR]%}"
+    fi
+}
+
+function precmd() {
+    export RPROMPT="$(form_right_prompt)"
+}
+
+bindkey '^[[H' beginning-of-line    \
+        '^[[F' end-of-line          \
+        '^[[3~' delete-char         \
+        '^[[5D' backward-word       \
+        '^[[5C' forward-word        \
+        '^[[1;5D' backward-word     \
+        '^[[1;5C' forward-word      \
+        '^[OF' end-of-line          \
+        '^[OH' beginning-of-line
+
+bindkey '^R' history-incremental-search-backward
+
+function extract()    # Handy Extract Program.
+{
+     if [ -f $1 ] ; then
+         case $1 in
+             *.tar.bz2)   tar xvjf $1     ;;
+             *.tar.gz)    tar xvzf $1     ;;
+             *.bz2)       bunzip2 $1      ;;
+             *.rar)       unrar x $1      ;;
+             *.gz)        gunzip $1       ;;
+             *.tar)       tar xvf $1      ;;
+             *.tbz2)      tar xvjf $1     ;;
+             *.tgz)       tar xvzf $1     ;;
+             *.zip)       unzip $1        ;;
+             *.Z)         uncompress $1   ;;
+             *.7z)        7z x $1         ;;
+             *)           echo "'$1' cannot be extracted via >extract<" ;;
+         esac
+     else
+         echo "'$1' is not a valid file"
+     fi
+}

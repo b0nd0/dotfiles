@@ -1,0 +1,5 @@
+# Ignore compiled python
+__pycache__/**
+
+# Ignore vim temporary files
+*.swp
